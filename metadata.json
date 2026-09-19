@@ -1,0 +1,6 @@
+{
+  "name": "AmarBazaar - Bangladeshi Business E-Commerce",
+  "description": "A complete, modern, production-ready Bangladeshi business e-commerce platform with bilingual English and Bangla support, BDT currency, and full retail architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
