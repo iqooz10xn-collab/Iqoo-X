@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const ContactUsPage: React.FC = () => {
-  const { language, t, showToast } = useApp();
+  const { language, t, showToast, siteSettings, setIsAdminOpen } = useApp();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [subject, setSubject] = useState('');
@@ -79,18 +79,27 @@ export const ContactUsPage: React.FC = () => {
                   <p className="text-white font-semibold">
                     {language === 'bn' ? 'গ্রাহক হেল্পলাইন:' : 'Customer Care:'}
                   </p>
-                  <a
-                    href="tel:+8801700123456"
-                    className="text-emerald-400 hover:underline font-mono font-medium block mt-0.5"
-                  >
-                    +880 1700-123456
-                  </a>
-                  <a
-                    href="tel:+8801800123456"
-                    className="text-stone-400 hover:underline font-mono font-medium block mt-0.5"
-                  >
-                    +880 1800-123456
-                  </a>
+                  {siteSettings.contactPhone ? (
+                    <a
+                      href={`tel:${siteSettings.contactPhone}`}
+                      className="text-emerald-400 hover:underline font-mono font-medium block mt-0.5"
+                    >
+                      {siteSettings.contactPhone}
+                    </a>
+                  ) : (
+                    <div className="mt-1">
+                      <p className="text-stone-400 italic text-[11px]">
+                        {language === 'bn' ? 'নম্বর যুক্ত করা হয়নি' : 'Pending configuration'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setIsAdminOpen(true)}
+                        className="text-[10px] text-emerald-400 hover:text-emerald-300 underline font-medium mt-0.5 block"
+                      >
+                        {language === 'bn' ? 'অ্যাডমিন থেকে ফোন নম্বর যুক্ত করুন' : 'Configure in Admin Settings'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -102,8 +111,27 @@ export const ContactUsPage: React.FC = () => {
                   <p className="text-white font-semibold">
                     {language === 'bn' ? 'ইমেইল যোগাযোগ:' : 'Official Email:'}
                   </p>
-                  <p className="text-stone-400 mt-0.5">support@amarbazaar.com.bd</p>
-                  <p className="text-stone-400">corporate@amarbazaar.com.bd</p>
+                  {siteSettings.contactEmail ? (
+                    <a
+                      href={`mailto:${siteSettings.contactEmail}`}
+                      className="text-emerald-400 hover:underline font-medium block mt-0.5"
+                    >
+                      {siteSettings.contactEmail}
+                    </a>
+                  ) : (
+                    <div className="mt-1">
+                      <p className="text-stone-400 italic text-[11px]">
+                        {language === 'bn' ? 'ইমেইল যুক্ত করা হয়নি' : 'Pending configuration'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setIsAdminOpen(true)}
+                        className="text-[10px] text-emerald-400 hover:text-emerald-300 underline font-medium mt-0.5 block"
+                      >
+                        {language === 'bn' ? 'অ্যাডমিন থেকে ইমেইল যুক্ত করুন' : 'Configure in Admin Settings'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

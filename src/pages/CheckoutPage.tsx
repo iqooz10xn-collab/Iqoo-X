@@ -29,9 +29,12 @@ export const CheckoutPage: React.FC = () => {
     clearCart,
     currentUser,
     setShippingRate,
+    siteSettings,
   } = useApp();
 
   const divisionList = getDivisionList();
+  const insideRate = siteSettings?.insideDhakaDeliveryRate ?? 60;
+  const outsideRate = siteSettings?.outsideDhakaDeliveryRate ?? 120;
 
   // Form State
   const [fullName, setFullName] = useState(currentUser?.name || '');
@@ -73,10 +76,10 @@ export const CheckoutPage: React.FC = () => {
     // Auto-adjust delivery zone
     if (newDivId === 'dhaka') {
       setShippingMethod('inside-dhaka');
-      setShippingRate(60);
+      setShippingRate(insideRate);
     } else {
       setShippingMethod('outside-dhaka');
-      setShippingRate(120);
+      setShippingRate(outsideRate);
     }
   };
 
@@ -87,10 +90,10 @@ export const CheckoutPage: React.FC = () => {
 
     if (newDistName.toLowerCase().includes('dhaka')) {
       setShippingMethod('inside-dhaka');
-      setShippingRate(60);
+      setShippingRate(insideRate);
     } else {
       setShippingMethod('outside-dhaka');
-      setShippingRate(120);
+      setShippingRate(outsideRate);
     }
   };
 
@@ -413,7 +416,7 @@ export const CheckoutPage: React.FC = () => {
                     <div
                       onClick={() => {
                         setShippingMethod('inside-dhaka');
-                        setShippingRate(60);
+                        setShippingRate(insideRate);
                       }}
                       className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
                         shippingMethod === 'inside-dhaka'
@@ -430,13 +433,15 @@ export const CheckoutPage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs font-extrabold text-stone-900">৳ ৬০</span>
+                      <span className="text-xs font-extrabold text-stone-900">
+                        {formatPrice(insideRate)}
+                      </span>
                     </div>
 
                     <div
                       onClick={() => {
                         setShippingMethod('outside-dhaka');
-                        setShippingRate(120);
+                        setShippingRate(outsideRate);
                       }}
                       className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
                         shippingMethod === 'outside-dhaka'
@@ -453,7 +458,9 @@ export const CheckoutPage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs font-extrabold text-stone-900">৳ ১২০</span>
+                      <span className="text-xs font-extrabold text-stone-900">
+                        {formatPrice(outsideRate)}
+                      </span>
                     </div>
                   </div>
                 </div>

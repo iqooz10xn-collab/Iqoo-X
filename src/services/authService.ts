@@ -19,9 +19,11 @@ class AuthService {
 
   private init() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY_AUTH);
-      if (stored) {
-        this.currentUser = JSON.parse(stored);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_KEY_AUTH);
+        if (stored) {
+          this.currentUser = JSON.parse(stored);
+        }
       }
     } catch {
       this.currentUser = null;
@@ -63,7 +65,9 @@ class AuthService {
     }
 
     try {
-      localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      }
     } catch {
       // ignore
     }
@@ -92,7 +96,9 @@ class AuthService {
     }
 
     try {
-      localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      }
     } catch {
       // ignore
     }
@@ -115,7 +121,9 @@ class AuthService {
     };
     this.currentUser = user;
     try {
-      localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      }
     } catch {
       // ignore
     }
@@ -136,17 +144,20 @@ class AuthService {
     ) {
       return { success: true, user: this.currentUser };
     }
+    const isEmail = identifier.includes('@');
     const user: CustomerUser = {
       id: `cust_${Date.now()}`,
-      name: 'Valued Customer',
-      phone: identifier.includes('@') ? '01711000000' : identifier,
-      email: identifier.includes('@') ? identifier : 'customer@amarbazaar.com.bd',
+      name: 'Customer',
+      phone: isEmail ? '' : identifier,
+      email: isEmail ? identifier : '',
       addresses: [],
       createdAt: new Date().toISOString(),
     };
     this.currentUser = user;
     try {
-      localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(this.currentUser));
+      }
     } catch {
       // ignore
     }
@@ -155,7 +166,13 @@ class AuthService {
 
   public signOut() {
     this.currentUser = null;
-    localStorage.removeItem(STORAGE_KEY_AUTH);
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_AUTH);
+      }
+    } catch {
+      // ignore
+    }
   }
 }
 

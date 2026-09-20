@@ -11,9 +11,11 @@ class WishlistService {
 
   private init() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY_WISHLIST);
-      if (stored) {
-        this.items = JSON.parse(stored);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_KEY_WISHLIST);
+        if (stored) {
+          this.items = JSON.parse(stored);
+        }
       }
     } catch {
       this.items = [];
@@ -54,12 +56,20 @@ class WishlistService {
 
   public clearWishlist() {
     this.items = [];
-    localStorage.removeItem(STORAGE_KEY_WISHLIST);
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_WISHLIST);
+      }
+    } catch {
+      // ignore
+    }
   }
 
   private persist() {
     try {
-      localStorage.setItem(STORAGE_KEY_WISHLIST, JSON.stringify(this.items));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_WISHLIST, JSON.stringify(this.items));
+      }
     } catch (e) {
       console.warn('Failed to persist wishlist', e);
     }

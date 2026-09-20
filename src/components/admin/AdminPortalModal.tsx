@@ -20,15 +20,35 @@ import {
   Terminal,
   RotateCcw,
   Sparkles,
+  Mail,
+  Phone,
+  Save,
+  Globe,
+  Building,
 } from 'lucide-react';
 
 export const AdminPortalModal: React.FC = () => {
-  const { isAdminOpen, setIsAdminOpen, language, formatPrice, showToast } = useApp();
+  const {
+    isAdminOpen,
+    setIsAdminOpen,
+    language,
+    formatPrice,
+    showToast,
+    siteSettings,
+    updateSiteSettings,
+  } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'integrations'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'settings' | 'integrations'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Site Settings Form State
+  const [settingsForm, setSettingsForm] = useState(siteSettings);
+
+  useEffect(() => {
+    setSettingsForm(siteSettings);
+  }, [siteSettings]);
 
   // Edit/Add Product Form State
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
@@ -62,6 +82,15 @@ export const AdminPortalModal: React.FC = () => {
       prev.map((o) => (o.id === orderId ? { ...o, orderStatus: status } : o))
     );
     showToast(`Order status updated to ${status.toUpperCase()}`, 'success');
+  };
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSiteSettings(settingsForm);
+    showToast(
+      language === 'bn' ? 'সেটিংস সফলভাবে সংরক্ষিত হয়েছে!' : 'Site settings updated successfully!',
+      'success'
+    );
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -172,6 +201,18 @@ export const AdminPortalModal: React.FC = () => {
           >
             <ShoppingCart className="w-4 h-4" />
             <span>Orders & Dispatch ({orders.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`py-3 px-3 border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'settings'
+                ? 'border-emerald-600 text-emerald-800 bg-white'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>Site & Business Settings</span>
           </button>
 
           <button
@@ -533,7 +574,321 @@ export const AdminPortalModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 3: BACKEND & GATEWAY READINESS */}
+          {/* TAB 3: SITE & BUSINESS SETTINGS */}
+          {activeTab === 'settings' && (
+            <form onSubmit={handleSaveSettings} className="space-y-6 text-xs text-stone-700">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
+                <div>
+                  <h3 className="font-bold text-stone-900 text-base flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-emerald-600" />
+                    <span>Site & Business Configuration</span>
+                  </h3>
+                  <p className="text-stone-500 text-xs mt-0.5">
+                    Configure your live store identity, contact phone, official Gmail, delivery charges, and payment methods without touching code.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-xs self-start sm:self-auto"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save All Settings</span>
+                </button>
+              </div>
+
+              {/* 1. Contact & Helpline Configuration */}
+              <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-emerald-600" />
+                      <span>Contact Helpline & Email</span>
+                    </h4>
+                    <p className="text-stone-500 text-[11px] mt-0.5">
+                      Enter the genuine phone and email for customer inquiries. Updates immediately propagate to the Header, Footer, and Contact Us page.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-semibold text-[10px]">
+                    Zero Fake Data Policy
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Customer Helpline Phone
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. +880 1700-000000 (or leave empty)"
+                      value={settingsForm.contactPhone}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, contactPhone: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                    <p className="text-stone-400 text-[10px] mt-1">
+                      Leave empty until your business SIM/helpline is active.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Official Contact Email / Gmail
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="e.g. support@yourdomain.com (or leave empty)"
+                      value={settingsForm.contactEmail}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, contactEmail: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                    <p className="text-stone-400 text-[10px] mt-1">
+                      Customer order replies and support queries will direct here.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Registered Business / Warehouse Address
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.businessAddress}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, businessAddress: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Customer Support Working Hours
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.supportHours}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, supportHours: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Store Identity */}
+              <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+                <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <Building className="w-4 h-4 text-emerald-600" />
+                  <span>Store Brand Identity</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Website Name
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.websiteName}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, websiteName: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Website Tagline / Slogan
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.websiteTagline}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, websiteTagline: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Delivery & Courier Rates */}
+              <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+                <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-emerald-600" />
+                  <span>Bangladesh Courier & Shipping Rates</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Inside Dhaka Delivery (৳)
+                    </label>
+                    <input
+                      type="number"
+                      value={settingsForm.insideDhakaDeliveryRate}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          insideDhakaDeliveryRate: Number(e.target.value) || 0,
+                        }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Outside Dhaka Delivery (৳)
+                    </label>
+                    <input
+                      type="number"
+                      value={settingsForm.outsideDhakaDeliveryRate}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          outsideDhakaDeliveryRate: Number(e.target.value) || 0,
+                        }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Payment Gateways Toggle */}
+              <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+                <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-emerald-600" />
+                  <span>Payment Gateway Activations</span>
+                </h4>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <label className="flex items-center gap-2 p-3 bg-white rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.enableCod}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          enableCod: e.target.checked,
+                        }))
+                      }
+                      className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                    />
+                    <span className="font-semibold text-stone-800">Cash on Delivery</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-3 bg-white rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.enableBkash}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          enableBkash: e.target.checked,
+                        }))
+                      }
+                      className="rounded text-pink-600 focus:ring-pink-500 w-4 h-4"
+                    />
+                    <span className="font-semibold text-stone-800">bKash (Live Gateway)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-3 bg-white rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.enableNagad}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          enableNagad: e.target.checked,
+                        }))
+                      }
+                      className="rounded text-orange-600 focus:ring-orange-500 w-4 h-4"
+                    />
+                    <span className="font-semibold text-stone-800">Nagad (Live Gateway)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-3 bg-white rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.enableRocket}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          enableRocket: e.target.checked,
+                        }))
+                      }
+                      className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4"
+                    />
+                    <span className="font-semibold text-stone-800">Rocket (Live Gateway)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* 5. SEO & Meta */}
+              <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+                <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-emerald-600" />
+                  <span>SEO & Metadata Settings</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Default Meta Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.metaTitle}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({ ...prev, metaTitle: e.target.value }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-700 font-semibold mb-1">
+                      Default Meta Description
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.metaDescription}
+                      onChange={(e) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          metaDescription: e.target.value,
+                        }))
+                      }
+                      className="w-full p-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save All Settings</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 4: BACKEND & GATEWAY READINESS */}
           {activeTab === 'integrations' && (
             <div className="space-y-6 text-xs text-stone-700">
               <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-2">

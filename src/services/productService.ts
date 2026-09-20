@@ -13,12 +13,16 @@ class ProductService {
 
   private init() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY_PRODUCTS);
-      if (stored) {
-        this.products = JSON.parse(stored);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_KEY_PRODUCTS);
+        if (stored) {
+          this.products = JSON.parse(stored);
+        } else {
+          this.products = [...DEMO_PRODUCTS];
+          localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
+        }
       } else {
         this.products = [...DEMO_PRODUCTS];
-        localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
       }
     } catch {
       this.products = [...DEMO_PRODUCTS];
@@ -161,7 +165,9 @@ class ProductService {
 
   private persist() {
     try {
-      localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
+      }
     } catch (e) {
       console.warn('Failed to persist products locally', e);
     }

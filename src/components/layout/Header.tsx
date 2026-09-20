@@ -35,6 +35,7 @@ export const Header: React.FC = () => {
     performSearch,
     route,
     setIsAdminOpen,
+    siteSettings,
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -103,13 +104,23 @@ export const Header: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            <a
-              href="tel:+8801700123456"
-              className="hidden lg:flex items-center gap-1.5 text-stone-300 hover:text-white transition"
-            >
-              <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
-              <span>+880 1700-123456</span>
-            </a>
+            {siteSettings.contactPhone ? (
+              <a
+                href={`tel:${siteSettings.contactPhone}`}
+                className="hidden lg:flex items-center gap-1.5 text-stone-300 hover:text-white transition"
+              >
+                <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{siteSettings.contactPhone}</span>
+              </a>
+            ) : (
+              <button
+                onClick={() => navigateTo('contact')}
+                className="hidden lg:flex items-center gap-1.5 text-stone-400 hover:text-stone-200 transition text-xs"
+              >
+                <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'bn' ? 'হেল্পলাইন' : 'Helpline Support'}</span>
+              </button>
+            )}
 
             <button
               onClick={() => navigateTo('track-order')}

@@ -2,64 +2,9 @@ import { Order, OrderStatus, PaymentStatus, OrderItem, Address, PaymentMethod } 
 
 const STORAGE_KEY_ORDERS = 'amarbazaar_orders';
 
-// Seed with a realistic demo sample order so users can test tracking immediately
-const SEED_ORDERS: Order[] = [
-  {
-    id: 'AB-260312',
-    customerId: 'cust_demo_01',
-    customerInfo: {
-      name: 'Rahim Uddin',
-      phone: '01711223344',
-      email: 'rahim.uddin@example.com',
-    },
-    shippingAddress: {
-      fullName: 'Rahim Uddin',
-      phone: '01711223344',
-      email: 'rahim.uddin@example.com',
-      division: 'Dhaka',
-      district: 'Dhaka (City & Suburbs)',
-      upazila: 'Dhanmondi',
-      streetAddress: 'House 42, Road 9/A, Dhanmondi R/A',
-      postalCode: '1209',
-      deliveryNote: 'Please deliver after 2 PM',
-    },
-    items: [
-      {
-        productId: 'prod_honey_01',
-        nameEn: 'Sundarbans Natural Raw Wild Honey',
-        nameBn: 'সুন্দরবনের প্রাকৃতিক খলিশা ফুলের খাঁটি মধু',
-        image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=300&q=80',
-        quantity: 1,
-        unitPrice: 950,
-        selectedVariants: { Weight: '500g' },
-        totalPrice: 950,
-      },
-      {
-        productId: 'prod_rice_04',
-        nameEn: 'Dinajpur Special Aromatic Kalijira Rice (Chinigura)',
-        nameBn: 'দিনাজপুরের স্পেশাল সুবাসিত কালিজিরা চিনিগুঁড়া চাল',
-        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80',
-        quantity: 2,
-        unitPrice: 160,
-        selectedVariants: { 'Pack Size': '1kg' },
-        totalPrice: 320,
-      },
-    ],
-    subtotal: 1270,
-    discountAmount: 100,
-    couponCode: 'AMAR100',
-    deliveryCharge: 60,
-    totalAmount: 1230,
-    paymentMethod: 'cod',
-    paymentStatus: 'pending',
-    orderStatus: 'shipped',
-    estimatedDeliveryDate: '2026-03-22',
-    trackingNumber: 'REDX-DH-98214',
-    courierPartner: 'RedX Express Logistics',
-    createdAt: '2026-03-18T10:30:00.000Z',
-    updatedAt: '2026-03-19T08:00:00.000Z',
-  },
-];
+// Initially no fake customer accounts or fake phone numbers.
+// Real customer orders created through checkout will be saved and persisted here.
+const SEED_ORDERS: Order[] = [];
 
 class OrderService {
   private orders: Order[] = [];
@@ -70,12 +15,15 @@ class OrderService {
 
   private init() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY_ORDERS);
-      if (stored) {
-        this.orders = JSON.parse(stored);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_KEY_ORDERS);
+        if (stored) {
+          this.orders = JSON.parse(stored);
+        } else {
+          this.orders = [...SEED_ORDERS];
+        }
       } else {
         this.orders = [...SEED_ORDERS];
-        localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(this.orders));
       }
     } catch {
       this.orders = [...SEED_ORDERS];
@@ -164,7 +112,9 @@ class OrderService {
 
   private persist() {
     try {
-      localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(this.orders));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(this.orders));
+      }
     } catch (e) {
       console.warn('Failed to persist orders', e);
     }

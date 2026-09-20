@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { language, t, navigateTo } = useApp();
+  const { language, t, navigateTo, siteSettings } = useApp();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
 
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
                 {language === 'bn' ? 'সার্বক্ষণিক গ্রাহক সেবা' : 'Dedicated Support'}
               </h4>
               <p className="text-stone-400 text-xs mt-0.5">
-                {language === 'bn' ? 'সকাল ৯টা হতে রাত ১০টা' : '+880 1700-123456'}
+                {siteSettings.contactPhone || (language === 'bn' ? 'সকাল ৯টা হতে রাত ১০টা' : '9:00 AM – 10:00 PM')}
               </p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
                 <Store className="w-5 h-5" />
               </div>
               <span className="font-extrabold text-2xl text-white tracking-tight">
-                Amar<span className="text-emerald-500">Bazaar</span>
+                {siteSettings.websiteName || 'AmarBazaar'}
               </span>
             </div>
 
@@ -114,16 +114,20 @@ export const Footer: React.FC = () => {
             <div className="space-y-2 text-xs text-stone-400">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>{t('addressDhaka')}</span>
+                <span>{siteSettings.businessAddress || t('addressDhaka')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{t('supportHours')}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>support@amarbazaar.com.bd</span>
-              </div>
+              {siteSettings.contactEmail ? (
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <a href={`mailto:${siteSettings.contactEmail}`} className="hover:underline">
+                    {siteSettings.contactEmail}
+                  </a>
+                </div>
+              ) : null}
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import { translations, TranslationKey } from '../i18n/translations';
 import { cartService, CartTotals } from '../services/cartService';
 import { wishlistService } from '../services/wishlistService';
 import { authService } from '../services/authService';
+import { settingsService, SiteSettings } from '../services/settingsService';
 
 export interface RouteState {
   page: string;
@@ -26,6 +27,10 @@ interface AppContextType {
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   formatPrice: (amount: number) => string;
   toBanglaDigits: (num: number | string) => string;
+
+  // Site Settings (configured via Admin)
+  siteSettings: SiteSettings;
+  updateSiteSettings: (newSettings: Partial<SiteSettings>) => void;
 
   // Navigation / Routing
   route: RouteState;
@@ -81,17 +86,33 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // 1. Language state
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('amarbazaar_lang');
-    return saved === 'bn' || saved === 'en' ? saved : 'en';
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('amarbazaar_lang');
+        return saved === 'bn' || saved === 'en' ? saved : 'en';
+      }
+    } catch {
+      // ignore
+    }
+    return 'en';
   });
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     try {
-      localStorage.setItem('amarbazaar_lang', lang);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('amarbazaar_lang', lang);
+      }
     } catch {
       // ignore
     }
+  }, []);
+
+  // Site Settings state
+  const [siteSettings, setSiteSettingsState] = useState<SiteSettings>(() => settingsService.getSettings());
+  const updateSiteSettings = useCallback((newSettings: Partial<SiteSettings>) => {
+    const updated = settingsService.updateSettings(newSettings);
+    setSiteSettingsState(updated);
   }, []);
 
   // Bangla number converter helper
@@ -159,38 +180,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 2. Routing state
   const [route, setRoute] = useState<RouteState>(() => {
-    return parseHash(window.location.hash);
+    if (typeof window !== 'undefined' && window.location) {
+      return parseHash(window.location.hash);
+    }
+    return { page: 'home' };
   });
 
   const navigateTo = useCallback((page: string, params?: Partial<RouteState>) => {
     const newRoute = { page, ...params };
     setRoute(newRoute);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Update window hash for browser history / direct link readiness
-    let hash = `#${page}`;
-    if (page === 'category' && params?.category) {
-      hash += `/${params.category}`;
-    } else if (params?.slug) {
-      hash += `/${params.slug}`;
+      // Update window hash for browser history / direct link readiness
+      let hash = `#${page}`;
+      if (page === 'category' && params?.category) {
+        hash += `/${params.category}`;
+      } else if (params?.slug) {
+        hash += `/${params.slug}`;
+      }
+
+      const queryParams = new URLSearchParams();
+      if (params?.query) queryParams.set('q', params.query);
+      if (params?.category && page !== 'category') queryParams.set('category', params.category);
+      if (params?.orderNumber) queryParams.set('orderNumber', params.orderNumber);
+      if (params?.orderId && !params?.orderNumber) queryParams.set('orderNumber', params.orderId);
+
+      const qs = queryParams.toString();
+      if (qs) {
+        hash += `?${qs}`;
+      }
+
+      try {
+        window.history.pushState(null, '', hash);
+      } catch {
+        // ignore in restrictive environments
+      }
     }
-
-    const queryParams = new URLSearchParams();
-    if (params?.query) queryParams.set('q', params.query);
-    if (params?.category && page !== 'category') queryParams.set('category', params.category);
-    if (params?.orderNumber) queryParams.set('orderNumber', params.orderNumber);
-    if (params?.orderId && !params?.orderNumber) queryParams.set('orderNumber', params.orderId);
-
-    const qs = queryParams.toString();
-    if (qs) {
-      hash += `?${qs}`;
-    }
-
-    window.history.pushState(null, '', hash);
   }, []);
 
   // Listen to popstate and hashchange
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const handleUrlChange = () => {
       setRoute(parseHash(window.location.hash));
     };
@@ -380,6 +411,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         t,
         formatPrice,
         toBanglaDigits,
+        siteSettings,
+        updateSiteSettings,
         route,
         navigateTo,
         cartItems,

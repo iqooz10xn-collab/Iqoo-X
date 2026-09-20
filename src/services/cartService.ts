@@ -24,13 +24,15 @@ class CartService {
 
   private init() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY_CART);
-      if (stored) {
-        this.items = JSON.parse(stored);
-      }
-      const storedCoupon = localStorage.getItem(STORAGE_KEY_COUPON);
-      if (storedCoupon) {
-        this.appliedCoupon = JSON.parse(storedCoupon);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_KEY_CART);
+        if (stored) {
+          this.items = JSON.parse(stored);
+        }
+        const storedCoupon = localStorage.getItem(STORAGE_KEY_COUPON);
+        if (storedCoupon) {
+          this.appliedCoupon = JSON.parse(storedCoupon);
+        }
       }
     } catch (e) {
       console.warn('Failed to load cart from storage', e);
@@ -146,8 +148,14 @@ class CartService {
   public clearCart() {
     this.items = [];
     this.appliedCoupon = null;
-    localStorage.removeItem(STORAGE_KEY_CART);
-    localStorage.removeItem(STORAGE_KEY_COUPON);
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_CART);
+        localStorage.removeItem(STORAGE_KEY_COUPON);
+      }
+    } catch {
+      // ignore
+    }
   }
 
   public applyCoupon(code: string): { success: boolean; messageEn: string; messageBn: string } {
@@ -189,7 +197,13 @@ class CartService {
 
   public removeCoupon() {
     this.appliedCoupon = null;
-    localStorage.removeItem(STORAGE_KEY_COUPON);
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_COUPON);
+      }
+    } catch {
+      // ignore
+    }
   }
 
   public calculateSubtotal(): number {
@@ -226,7 +240,9 @@ class CartService {
 
   private persist() {
     try {
-      localStorage.setItem(STORAGE_KEY_CART, JSON.stringify(this.items));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_CART, JSON.stringify(this.items));
+      }
     } catch (e) {
       console.warn('Failed to persist cart to storage', e);
     }
