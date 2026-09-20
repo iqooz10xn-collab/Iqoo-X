@@ -151,31 +151,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Helper to parse hash path into RouteState
   const parseHash = (hashString: string): RouteState => {
-    const clean = hashString.replace(/^#\/?/, '').trim();
-    if (!clean) return { page: 'home' };
+    try {
+      const clean = hashString ? hashString.replace(/^#\/?/, '').trim() : '';
+      if (!clean) return { page: 'home' };
 
-    const [pathPart, queryPart] = clean.split('?');
-    const parts = pathPart.split('/').filter(Boolean);
-    const page = parts[0] || 'home';
-    const slug = parts[1];
+      const [pathPart, queryPart] = clean.split('?');
+      const parts = (pathPart || '').split('/').filter(Boolean);
+      const page = parts[0] || 'home';
+      const slug = parts[1];
 
-    let query: string | undefined;
-    let category: string | undefined;
-    let orderNumber: string | undefined;
+      let query: string | undefined;
+      let category: string | undefined;
+      let orderNumber: string | undefined;
 
-    if (page === 'category' && slug) {
-      category = slug;
+      if (page === 'category' && slug) {
+        category = slug;
+      }
+
+      if (queryPart) {
+        const searchParams = new URLSearchParams(queryPart);
+        if (searchParams.has('q')) query = searchParams.get('q') || undefined;
+        if (searchParams.has('category')) category = searchParams.get('category') || category;
+        if (searchParams.has('orderNumber')) orderNumber = searchParams.get('orderNumber') || undefined;
+        if (searchParams.has('orderId')) orderNumber = searchParams.get('orderId') || orderNumber;
+      }
+
+      return { page, slug, query, category, orderNumber, orderId: orderNumber };
+    } catch (e) {
+      console.warn('Error parsing route hash, defaulting to home:', e);
+      return { page: 'home' };
     }
-
-    if (queryPart) {
-      const searchParams = new URLSearchParams(queryPart);
-      if (searchParams.has('q')) query = searchParams.get('q') || undefined;
-      if (searchParams.has('category')) category = searchParams.get('category') || category;
-      if (searchParams.has('orderNumber')) orderNumber = searchParams.get('orderNumber') || undefined;
-      if (searchParams.has('orderId')) orderNumber = searchParams.get('orderId') || orderNumber;
-    }
-
-    return { page, slug, query, category, orderNumber, orderId: orderNumber };
   };
 
   // 2. Routing state

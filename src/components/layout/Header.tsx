@@ -104,7 +104,7 @@ export const Header: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            {siteSettings.contactPhone ? (
+            {siteSettings?.contactPhone ? (
               <a
                 href={`tel:${siteSettings.contactPhone}`}
                 className="hidden lg:flex items-center gap-1.5 text-stone-300 hover:text-white transition"
