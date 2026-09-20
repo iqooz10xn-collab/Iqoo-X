@@ -25,7 +25,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
     : 0;
 
   const displayName = language === 'bn' ? product.nameBn : product.nameEn;
-  const primaryImage = product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
+  const primaryImage = product.images?.[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
 
   const handleCardClick = () => {
     navigateTo('product', { slug: product.slug });

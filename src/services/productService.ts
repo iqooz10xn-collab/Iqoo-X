@@ -16,7 +16,13 @@ class ProductService {
       if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
         const stored = localStorage.getItem(STORAGE_KEY_PRODUCTS);
         if (stored) {
-          this.products = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this.products = parsed;
+          } else {
+            this.products = [...DEMO_PRODUCTS];
+            localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
+          }
         } else {
           this.products = [...DEMO_PRODUCTS];
           localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(this.products));
@@ -30,14 +36,23 @@ class ProductService {
   }
 
   public async getAllProducts(): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return [...this.products];
   }
 
   public async getProductBySlug(slug: string): Promise<Product | undefined> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products.find((p) => p.slug === slug);
   }
 
   public async getProductById(id: string): Promise<Product | undefined> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products.find((p) => p.id === id);
   }
 
@@ -50,18 +65,30 @@ class ProductService {
   }
 
   public async getFeaturedProducts(): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products.filter((p) => p.isFeatured);
   }
 
   public async getNewArrivals(): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products.filter((p) => p.isNewArrival);
   }
 
   public async getSaleProducts(): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products.filter((p) => p.isSale || (p.discountPrice && p.discountPrice < p.price));
   }
 
   public async getRelatedProducts(currentProductId: string, category: string): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     return this.products
       .filter((p) => p.id !== currentProductId && p.category === category)
       .slice(0, 4);
@@ -71,19 +98,22 @@ class ProductService {
     query: string,
     filters?: Partial<FilterState>
   ): Promise<Product[]> {
+    if (!this.products || this.products.length === 0) {
+      this.products = [...DEMO_PRODUCTS];
+    }
     let list = [...this.products];
 
     // Search query matching English, Bangla, SKU, Category, Brand, Tags
-    if (query.trim()) {
+    if (query && query.trim()) {
       const q = query.trim().toLowerCase();
       list = list.filter((p) => {
         return (
-          p.nameEn.toLowerCase().includes(q) ||
-          p.nameBn.includes(q) ||
-          p.sku.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q))
+          (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
+          (p.nameBn && p.nameBn.includes(q)) ||
+          (p.sku && p.sku.toLowerCase().includes(q)) ||
+          (p.brand && p.brand.toLowerCase().includes(q)) ||
+          (p.category && p.category.toLowerCase().includes(q)) ||
+          (Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase().includes(q)))
         );
       });
     }

@@ -192,7 +192,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
             {/* Primary Main Image Container */}
             <div className="relative aspect-square rounded-2xl bg-stone-100 overflow-hidden border border-stone-200/60 group">
               <img
-                src={product.images[selectedImageIndex] || product.images[0]}
+                src={product.images?.[selectedImageIndex] || product.images?.[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}
                 alt={displayName}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
               />
@@ -213,7 +213,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
             </div>
 
             {/* Thumbnails Row */}
-            {product.images.length > 1 && (
+            {(product.images?.length || 0) > 1 && (
               <div className="flex items-center gap-3 overflow-x-auto pb-1">
                 {product.images.map((img: string, idx: number) => (
                   <button

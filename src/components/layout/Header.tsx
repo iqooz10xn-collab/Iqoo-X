@@ -228,7 +228,7 @@ export const Header: React.FC = () => {
                     className="px-3.5 py-2.5 hover:bg-stone-50 flex items-center gap-3 cursor-pointer transition"
                   >
                     <img
-                      src={item.images[0]}
+                      src={item.images?.[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'}
                       alt={item.nameEn}
                       className="w-10 h-10 rounded-lg object-cover bg-stone-100 shrink-0"
                     />
@@ -303,7 +303,7 @@ export const Header: React.FC = () => {
                   {t('shoppingCart')}
                 </span>
                 <span className="text-xs font-bold text-emerald-950">
-                  {formatPrice(cartTotals.subtotal)}
+                  {formatPrice(cartTotals?.subtotal || 0)}
                 </span>
               </div>
             </button>
